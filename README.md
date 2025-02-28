@@ -2,6 +2,7 @@
 
 ## Overview
 This project implements a peer-to-peer (P2P) gossip protocol with seed and peer nodes. Seed nodes help bootstrap the network by maintaining a list of active peer nodes, while peer nodes:
+
 - Connect to a subset of seeds to get the peer list.
 - Connect to other peers to form a network.
 - Broadcast gossip messages.
@@ -15,74 +16,90 @@ This project implements a peer-to-peer (P2P) gossip protocol with seed and peer 
 
 ## Requirements
 - Python 3.x
-- Docker
+- Docker (Optional)
 
 ## peer.py
+This code implements a peer-to-peer (P2P) networking system where nodes (peers) communicate, exchange peer lists, and propagate messages using a gossip protocol. Each peer connects to a set of seed nodes to register itself and receive a list of other peers. It then establishes connections with selected peers using a Zipf distribution to simulate real-world decentralized networks.
 
-This code implements a peer-to-peer (P2P) networking system where nodes (peers) communicate, exchange peer lists, and propagate messages using a gossip protocol. Each peer connects to a set of seed nodes to register itself and receive a list of other peers. It then establishes connections with selected peers using a Zipf distribution to simulate real-world decentralized networks. The peer node runs a server to handle incoming connections, supports liveness checks via periodic pings, and detects and reports dead nodes. It also generates and forwards gossip messages to propagate information efficiently. The system is multi-threaded, ensuring concurrent handling of connections, messaging, and periodic checks, and logs important events to an output file.
+The peer node runs a server to handle incoming connections, supports liveness checks via periodic pings, and detects and reports dead nodes. It also generates and forwards gossip messages to propagate information efficiently. The system is multi-threaded, ensuring concurrent handling of connections, messaging, and periodic checks, and logs important events to an output file.
 
 ## seed.py
-This script implements a **seed node** for a peer-to-peer (P2P) network, responsible for maintaining a list of active peers and facilitating peer discovery. When a new peer connects, the seed node registers it, stores its IP and port, and shares the current peer list. Peers can also report dead nodes, which the seed removes from its list. The seed node handles multiple peer connections using multithreading and logs all significant events in `output_seed.txt`. The server listens on the specified IP (`172.31.77.221`) and a user-defined port, allowing dynamic deployment. The program is designed to be robust, supporting graceful shutdown on keyboard interrupts.
+This script implements a **seed node** for a peer-to-peer (P2P) network, responsible for maintaining a list of active peers and facilitating peer discovery. When a new peer connects, the seed node registers it, stores its IP and port, and shares the current peer list. Peers can also report dead nodes, which the seed removes from its list.
+
+The seed node handles multiple peer connections using multithreading and logs all significant events in `output_seed.txt`. The server listens on the specified IP (`172.31.77.221`) and a user-defined port, allowing dynamic deployment. The program is designed to be robust, supporting graceful shutdown on keyboard interrupts.
 
 ## Running the Application
 
 ### Without Docker
 1. **Prepare `config.txt`**: Ensure it contains seed node addresses in the format `IP:Port`, e.g.:
 
-127.0.0.1:1500 127.0.0.1:1501 127.0.0.1:1502
+```
+127.0.0.1:1500
+127.0.0.1:1501
+127.0.0.1:1502
+```
 
 2. **Start Seed Nodes**:
 Open multiple terminal windows and run:
+
 ```bash
 python seed.py 1500
 python seed.py 1501
 python seed.py 1502
+```
 
-    Start Peer Nodes: Open additional terminal windows and run:
+3. **Start Peer Nodes**:
+Open additional terminal windows and run:
 
-    python peer.py 2000
-    python peer.py 2001
+```bash
+python peer.py 2000
+python peer.py 2001
+```
 
-    Testing:
-        Observe the console outputs.
-        Check output_seed.txt and output_peer.txt for logs.
-        Test liveness by closing a peer node and observing dead node reports.
+4. **Testing**:
+- Observe the console outputs.
+- Check `output_seed.txt` and `output_peer.txt` for logs.
+- Test liveness by closing a peer node and observing dead node reports.
 
-With Docker
+### With Docker
 
-    Build the Docker image:
+1. **Build the Docker image:**
 
+```bash
 docker build -t p2p-gossip .
+```
 
-Run the Docker container:
+2. **Run the Docker container:**
 
-    docker run -it --rm p2p-gossip
+```bash
+docker run -it --rm p2p-gossip
+```
 
-    Inside the Container: Start seed and peer nodes as described above.
+3. **Inside the Container:** Start seed and peer nodes as described above.
 
-Code Structure & Comments
+## Code Structure & Comments
 
-    peer.py:
-        Reads seeds from config.txt and connects to ⌊(n/2)⌋+1 seeds.
-        Retrieves a peer list and connects to a subset of peers.
-        Generates and forwards gossip messages while maintaining a message history.
-        Periodically sends liveness pings and reports dead nodes.
-    seed.py:
-        Accepts connections from new peers and maintains a list of active peers.
-        Removes dead nodes upon receiving a “Dead Node” message.
-    Common Considerations:
-        Threading is used for handling multiple connections and background tasks.
-        Socket programming is used to simulate the P2P network.
+- **peer.py:**
+  - Reads seeds from `config.txt` and connects to ⌊(n/2)⌋+1 seeds.
+  - Retrieves a peer list and connects to a subset of peers.
+  - Generates and forwards gossip messages while maintaining a message history.
+  - Periodically sends liveness pings and reports dead nodes.
 
-Future Improvements
+- **seed.py:**
+  - Accepts connections from new peers and maintains a list of active peers.
+  - Removes dead nodes upon receiving a "Dead Node" message.
 
-    Power-Law Degree Distribution:
-    Enhance the peer selection algorithm to more closely follow a power-law distribution.
-    Modularization:
-    Consider refactoring common functions (e.g., logging, configuration parsing) into a separate module.
-    Robust Liveness Checking:
-    Integrate an actual system ping utility for more reliable liveness checks.
+## Common Considerations
+- **Threading**: Used for handling multiple connections and background tasks.
+- **Socket programming**: Simulates the P2P network.
 
-Contributors
-- Aditya Sahani(B22CS003)
-- Souvik Maji(B22CS089)
+## Future Improvements
+- **Power-Law Degree Distribution:** Enhance the peer selection algorithm to more closely follow a power-law distribution.
+- **Modularization:** Refactor common functions (e.g., logging, configuration parsing) into a separate module.
+- **Robust Liveness Checking:** Integrate an actual system ping utility for more reliable liveness checks.
+
+## Contributors
+- **Aditya Sahani (B22CS003)**
+- **Souvik Maji (B22CS089)**
+
+
